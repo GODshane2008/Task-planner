@@ -1,364 +1,690 @@
-let tasks = JSON.parse(
-    localStorage.getItem("tasks")
+// =====================
+// STORAGE
+// =====================
+
+let tasks =
+JSON.parse(
+localStorage.getItem("tasks")
 ) || [];
 
-let xp = Number(
-    localStorage.getItem("xp")
+let xp =
+parseInt(
+localStorage.getItem("xp")
 ) || 0;
 
-let chart;
+let progress =
+JSON.parse(
+localStorage.getItem("progress")
+) || {};
 
-render();
+// =====================
+// ELEMENTS
+// =====================
 
-function addTask(){
+const taskInput =
+document.getElementById(
+"taskInput"
+);
 
-    const input =
-        document.getElementById("taskInput");
+const addTaskBtn =
+document.getElementById(
+"addTaskBtn"
+);
 
-    const text =
-        input.value.trim();
+const taskList =
+document.getElementById(
+"taskList"
+);
 
-    if(text === "") return;
+const xpValue =
+document.getElementById(
+"xpValue"
+);
 
-    tasks.push({
-        text:text,
-        completed:false
-    });
+const streakValue =
+document.getElementById(
+"streakValue"
+);
 
-    input.value = "";
+const levelValue =
+document.getElementById(
+"levelValue"
+);
 
-    saveData();
-}
+const badgeContainer =
+document.getElementById(
+"badgeContainer"
+);
 
-function toggleTask(index){
-
-    if(!tasks[index].completed){
-
-        xp += 10;
-
-        recordProgress();
-    }
-
-    tasks[index].completed =
-        !tasks[index].completed;
-
-    saveData();
-}
-
-function renameTask(index){
-
-    const newName = prompt(
-        "Rename task",
-        tasks[index].text
-    );
-
-    if(newName &&
-       newName.trim() !== ""){
-
-        tasks[index].text =
-            newName.trim();
-
-        saveData();
-    }
-}
-
-function deleteTask(index){
-
-    if(confirm(
-        "Delete this task?"
-    )){
-        tasks.splice(index,1);
-
-        saveData();
-    }
-}
+// =====================
+// SAVE
+// =====================
 
 function saveData(){
 
-    localStorage.setItem(
-        "tasks",
-        JSON.stringify(tasks)
-    );
+localStorage.setItem(
+"tasks",
+JSON.stringify(tasks)
+);
 
-    localStorage.setItem(
-        "xp",
-        xp
-    );
+localStorage.setItem(
+"xp",
+xp
+);
 
-    render();
+localStorage.setItem(
+"progress",
+JSON.stringify(progress)
+);
+
 }
 
-function render(){
+// =====================
+// ADD TASK
+// =====================
 
-    const taskList =
-        document.getElementById(
-            "taskList"
-        );
+function addTask(){
 
-    taskList.innerHTML = "";
+const text =
+taskInput.value.trim();
 
-    tasks.forEach(
-        (task,index)=>{
+if(text === "")
+return;
 
-        const li =
-            document.createElement(
-                "li"
-            );
+tasks.push({
 
-        li.className =
-            task.completed
-            ? "task completed"
-            : "task";
+id:Date.now(),
 
-        li.innerHTML = `
-        <span>${task.text}</span>
+text:text,
 
-        <div class="task-buttons">
+completed:false
 
-            <button
-            class="complete-btn"
-            onclick="toggleTask(${index})">
-            ✓
-            </button>
+});
 
-            <button
-            class="edit-btn"
-            onclick="renameTask(${index})">
-            ✏️
-            </button>
+taskInput.value="";
 
-            <button
-            class="delete-btn"
-            onclick="deleteTask(${index})">
-            🗑️
-            </button>
+saveData();
 
-        </div>
-        `;
+renderTasks();
 
-        taskList.appendChild(li);
-    });
-
-    updateStats();
-
-    updateBadges();
-
-    drawChart();
 }
 
-function updateStats(){
+// =====================
+// COMPLETE TASK
+// =====================
 
-    document.getElementById(
-        "xp"
-    ).textContent = xp;
+function completeTask(id){
 
-    document.getElementById(
-        "level"
-    ).textContent =
-        Math.floor(xp / 100) + 1;
+const task =
+tasks.find(
+t => t.id === id
+);
 
-    document.getElementById(
-        "streak"
-    ).textContent =
-        calculateStreak();
+if(!task)
+return;
+
+if(task.completed)
+return;
+
+task.completed = true;
+
+xp += 10;
+
+recordProgress();
+
+saveData();
+
+updateStats();
+
+renderTasks();
+
 }
 
-function recordProgress(){
+// =====================
+// DELETE TASK
+// =====================
 
-    const today =
-        new Date()
-        .toISOString()
-        .split("T")[0];
+function deleteTask(id){
 
-    const progress =
-        JSON.parse(
-            localStorage.getItem(
-                "progress"
-            )
-        ) || {};
+tasks =
+tasks.filter(
+t => t.id !== id
+);
 
-    progress[today] =
-        (progress[today] || 0) + 1;
+saveData();
 
-    localStorage.setItem(
-        "progress",
-        JSON.stringify(progress)
-    );
+renderTasks();
+
 }
+
+// =====================
+// EDIT TASK
+// =====================
+
+function editTask(id){
+
+const task =
+tasks.find(
+t => t.id === id
+);
+
+const newText =
+prompt(
+"Edit Task",
+task.text
+);
+
+if(
+newText &&
+newText.trim() !== ""
+){
+
+task.text =
+newText.trim();
+
+saveData();
+
+renderTasks();
+
+}
+
+}
+
+// =====================
+// RENDER TASKS
+// =====================
+
+function renderTasks(){
+
+taskList.innerHTML="";
+
+tasks.forEach(task=>{
+
+const li =
+document.createElement(
+"li"
+);
+
+li.className =
+"task-item";
+
+li.innerHTML = `
+
+<span class="${
+task.completed
+? "completed"
+: ""
+}">
+${task.text}
+</span>
+
+<div class="task-actions">
+
+<button
+class="complete-btn"
+onclick="completeTask(${task.id})">
+
+✓
+
+</button>
+
+<button
+class="edit-btn"
+onclick="editTask(${task.id})">
+
+✏️
+
+</button>
+
+<button
+class="delete-btn"
+onclick="deleteTask(${task.id})">
+
+🗑️
+
+</button>
+
+</div>
+
+`;
+
+taskList.appendChild(li);
+
+});
+
+}
+
+// =====================
+// STREAK
+// =====================
 
 function calculateStreak(){
 
-    const progress =
-        JSON.parse(
-            localStorage.getItem(
-                "progress"
-            )
-        ) || {};
+const dates =
+Object.keys(progress)
+.sort()
+.reverse();
 
-    const dates =
-        Object.keys(progress)
-        .sort()
-        .reverse();
+if(dates.length===0)
+return 0;
 
-    if(dates.length === 0)
-        return 0;
+let streak = 1;
 
-    let streak = 1;
+let current =
+new Date(dates[0]);
 
-    let current =
-        new Date(dates[0]);
+for(
+let i=1;
+i<dates.length;
+i++
+){
 
-    for(
-        let i=1;
-        i<dates.length;
-        i++
-    ){
+let previous =
+new Date(dates[i]);
 
-        const previous =
-            new Date(dates[i]);
+let diff =
+(current-previous)
+/ 86400000;
 
-        const diff =
-            (current - previous)
-            / 86400000;
+if(diff===1){
 
-        if(diff === 1){
+streak++;
 
-            streak++;
+current=
+previous;
 
-            current = previous;
-        }
-        else{
-            break;
-        }
-    }
+}else{
 
-    return streak;
+break;
+
 }
+
+}
+
+return streak;
+
+}
+
+// =====================
+// DAILY TRACKING
+// =====================
+
+function recordProgress(){
+
+const today =
+new Date()
+.toISOString()
+.split("T")[0];
+
+progress[today] =
+(progress[today]||0)+1;
+
+}
+
+// =====================
+// LEVEL
+// =====================
+
+function calculateLevel(){
+
+return Math.floor(
+xp / 100
+)+1;
+
+}
+
+// =====================
+// STATS
+// =====================
+
+function updateStats(){
+
+xpValue.textContent =
+xp;
+
+levelValue.textContent =
+calculateLevel();
+
+streakValue.textContent =
+calculateStreak()
++ " Days";
+
+updateBadges();
+
+}
+// =====================
+// ACHIEVEMENTS
+// =====================
 
 function updateBadges(){
 
-    const badgesDiv =
-        document.getElementById(
-            "badges"
-        );
+let badges = [];
 
-    let badges = [];
+if(xp >= 10)
+badges.push("🏆 First Win");
 
-    if(xp >= 100)
-        badges.push(
-            "💯 100 XP"
-        );
+if(xp >= 100)
+badges.push("💯 100 XP");
 
-    if(xp >= 500)
-        badges.push(
-            "🏆 500 XP"
-        );
+if(xp >= 500)
+badges.push("🚀 500 XP");
 
-    if(xp >= 1000)
-        badges.push(
-            "👑 1000 XP"
-        );
+if(xp >= 1000)
+badges.push("👑 1000 XP");
 
-    if(calculateStreak() >= 7)
-        badges.push(
-            "🔥 7 Day Streak"
-        );
+if(calculateStreak() >= 7)
+badges.push("🔥 7 Day Streak");
 
-    if(calculateStreak() >= 30)
-        badges.push(
-            "🚀 30 Day Streak"
-        );
+if(calculateStreak() >= 30)
+badges.push("⚡ 30 Day Streak");
 
-    if(badges.length === 0){
+badgeContainer.innerHTML = "";
 
-        badgesDiv.innerHTML =
-            "<p>No badges yet.</p>";
+badges.forEach(badge=>{
 
-        return;
-    }
+const div =
+document.createElement("div");
 
-    badgesDiv.innerHTML =
-        badges
-        .map(
-            badge =>
-            `<span class="badge">
-                ${badge}
-            </span>`
-        )
-        .join("");
+div.className =
+"badge";
+
+div.textContent =
+badge;
+
+badgeContainer.appendChild(div);
+
+});
+
 }
 
-function drawChart(){
+// =====================
+// CHART
+// =====================
 
-    const progress =
-        JSON.parse(
-            localStorage.getItem(
-                "progress"
-            )
-        ) || {};
+let progressChart;
 
-    const labels =
-        Object.keys(progress)
-        .slice(-30);
+function renderChart(){
 
-    const values =
-        labels.map(
-            date =>
-            progress[date]
-        );
+const ctx =
+document.getElementById(
+"progressChart"
+);
 
-    const ctx =
-        document.getElementById(
-            "progressChart"
-        );
+if(!ctx)
+return;
 
-    if(chart){
-        chart.destroy();
-    }
+const labels =
+Object.keys(progress)
+.slice(-30);
 
-    chart = new Chart(ctx,{
-        type:"line",
+const values =
+labels.map(
+day => progress[day]
+);
 
-        data:{
-            labels:labels,
+if(progressChart){
 
-            datasets:[
-            {
-                label:
-                "Completed Tasks",
+progressChart.destroy();
 
-                data:values,
-
-                tension:0.4,
-
-                fill:false
-            }]
-        },
-
-        options:{
-            responsive:true,
-
-            plugins:{
-                legend:{
-                    labels:{
-                        color:"white"
-                    }
-                }
-            },
-
-            scales:{
-                x:{
-                    ticks:{
-                        color:"white"
-                    }
-                },
-
-                y:{
-                    ticks:{
-                        color:"white"
-                    }
-                }
-            }
-        }
-    });
 }
+
+progressChart =
+new Chart(ctx,{
+
+type:"line",
+
+data:{
+
+labels:labels,
+
+datasets:[{
+
+label:
+"Completed Tasks",
+
+data:values,
+
+tension:0.4,
+
+fill:true
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+
+labels:{
+
+color:"white"
+
+}
+
+}
+
+},
+
+scales:{
+
+x:{
+
+ticks:{
+
+color:"white"
+
+}
+
+},
+
+y:{
+
+ticks:{
+
+color:"white"
+
+}
+
+}
+
+}
+
+}
+
+});
+
+}
+
+// =====================
+// HEATMAP
+// =====================
+
+function renderHeatmap(){
+
+const heatmap =
+document.getElementById(
+"heatmap"
+);
+
+if(!heatmap)
+return;
+
+heatmap.innerHTML = "";
+
+for(
+let i=0;
+i<35;
+i++
+){
+
+const cell =
+document.createElement(
+"div"
+);
+
+cell.classList.add(
+"heat-cell"
+);
+
+const value =
+Math.floor(
+Math.random()*4
+);
+
+if(value===1){
+
+cell.classList.add(
+"heat-low"
+);
+
+}
+
+if(value===2){
+
+cell.classList.add(
+"heat-medium"
+);
+
+}
+
+if(value===3){
+
+cell.classList.add(
+"heat-high"
+);
+
+}
+
+heatmap.appendChild(
+cell
+);
+
+}
+
+}
+
+// =====================
+// XP RING
+// =====================
+
+function updateXpRing(){
+
+const ring =
+document.querySelector(
+".xp-ring"
+);
+
+if(!ring)
+return;
+
+const progressPercent =
+xp % 100;
+
+ring.style.background =
+
+`conic-gradient(
+#3b82f6
+${progressPercent}%,
+rgba(255,255,255,.08)
+0
+)`;
+
+}
+
+// =====================
+// NOTIFICATIONS
+// =====================
+
+function requestNotifications(){
+
+if(
+"Notification"
+in window
+){
+
+Notification
+.requestPermission();
+
+}
+
+}
+
+// =====================
+// INIT
+// =====================
+
+function initializeDashboard(){
+
+renderTasks();
+
+updateStats();
+
+renderChart();
+
+renderHeatmap();
+
+updateXpRing();
+
+requestNotifications();
+
+}
+
+// =====================
+// EVENTS
+// =====================
+
+addTaskBtn.addEventListener(
+
+"click",
+
+addTask
+
+);
+
+taskInput.addEventListener(
+
+"keypress",
+
+function(e){
+
+if(
+e.key==="Enter"
+){
+
+addTask();
+
+}
+
+}
+
+);
+
+// =====================
+// OVERRIDE UPDATE STATS
+// =====================
+
+const oldUpdateStats =
+updateStats;
+
+updateStats = function(){
+
+oldUpdateStats();
+
+updateXpRing();
+
+renderChart();
+
+renderHeatmap();
+
+};
+
+// =====================
+// START APP
+// =====================
+
+initializeDashboard();
