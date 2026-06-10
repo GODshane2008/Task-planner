@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Growth Tracker Pro</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>🚀 Growth Tracker Pro</h1>
+
+    <div class="stats-grid">
+
+        <div class="card">
+            <h3>XP</h3>
+            <p id="xp">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Level</h3>
+            <p id="level">1</p>
+        </div>
+
+        <div class="card">
+            <h3>Streak 🔥</h3>
+            <p id="streak">0</p>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <h2>Add Task</h2>
+
+        <input
+            id="taskInput"
+            placeholder="Enter task..."
+        >
+
+        <button onclick="addTask()">
+            Add Task
+        </button>
+    </div>
+
+    <div class="card">
+        <h2>Task List</h2>
+
+        <ul id="taskList"></ul>
+    </div>
+
+    <div class="card">
+        <h2>Achievements</h2>
+
+        <div id="badges"></div>
+    </div>
+
+    <div class="card">
+        <h2>Monthly Progress</h2>
+
+        <canvas id="progressChart"></canvas>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
