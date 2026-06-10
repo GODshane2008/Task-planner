@@ -4,13 +4,14 @@
 <head>
 
     <meta charset="UTF-8">
+
     <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+          content="width=device-width, initial-scale=1.0">
 
     <title>Growth OS</title>
 
     <link rel="stylesheet"
-        href="style.css">
+          href="style.css">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -65,6 +66,7 @@
             <header class="header">
 
                 <div>
+
                     <h1>
                         Welcome Back Shane 👋
                     </h1>
@@ -72,6 +74,7 @@
                     <p>
                         Keep growing every day.
                     </p>
+
                 </div>
 
                 <button class="premium-btn">
@@ -84,36 +87,58 @@
 
             <section class="stats-grid">
 
+                <!-- XP -->
+
                 <div class="glass-card xp-card">
 
                     <h3>XP</h3>
 
                     <div class="xp-ring">
 
-                        <div class="xp-value">
-                            350
+                        <div
+                            class="xp-value"
+                            id="xpValue">
+
+                            0
+
                         </div>
 
                     </div>
 
                 </div>
 
+                <!-- Streak -->
+
                 <div class="glass-card">
 
-                    <h3>🔥 Current Streak</h3>
+                    <h3>
+                        🔥 Current Streak
+                    </h3>
 
-                    <p class="big-number">
-                        14 Days
+                    <p
+                        class="big-number"
+                        id="streakValue">
+
+                        0 Days
+
                     </p>
 
                 </div>
 
+                <!-- Level -->
+
                 <div class="glass-card">
 
-                    <h3>⭐ Level</h3>
+                    <h3>
+                        ⭐ Level
+                    </h3>
 
-                    <p class="big-number">
-                        7
+                    <p
+                        class="big-number"
+                        id="levelValue">
+
+                        1
+
                     </p>
 
                 </div>
@@ -161,8 +186,8 @@
                         Monthly Progress
                     </h2>
 
-                    <canvas
-                        id="progressChart">
+                    <canvas id="progressChart">
+
                     </canvas>
 
                 </div>
@@ -189,19 +214,9 @@
                     Achievements
                 </h2>
 
-                <div class="badge-container">
-
-                    <div class="badge">
-                        🏆 First Win
-                    </div>
-
-                    <div class="badge">
-                        🔥 7 Day Streak
-                    </div>
-
-                    <div class="badge">
-                        💯 100 XP
-                    </div>
+                <div
+                    class="badge-container"
+                    id="badgeContainer">
 
                 </div>
 
